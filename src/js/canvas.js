@@ -1,4 +1,4 @@
-import utils from './utils'
+import utils, {randomColor, randomIntFromRange} from './utils'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
@@ -11,62 +11,87 @@ const mouse = {
   y: innerHeight / 2
 }
 
-const colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']
+const colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66'];
+const gravity = 1;
+const frictionDy = 0.925;
+const frictionDx = 0.5;
 
 // Event Listeners
 addEventListener('mousemove', (event) => {
   mouse.x = event.clientX
   mouse.y = event.clientY
-})
+});
 
 addEventListener('resize', () => {
   canvas.width = innerWidth
   canvas.height = innerHeight
 
   init()
+});
+
+addEventListener('click', () => {
+  init();
 })
 
 // Objects
-class Object {
-  constructor(x, y, radius, color) {
-    this.x = x
-    this.y = y
-    this.radius = radius
-    this.color = color
+class Ball {
+  constructor(x, y, dx, dy, radius, color) {
+    this.x = x;
+    this.y = y;
+    this.dx = dx;
+    this.dy = dy;
+    this.radius = radius;
+    this.color = color;
   }
 
   draw() {
-    c.beginPath()
-    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-    c.fillStyle = this.color
-    c.fill()
-    c.closePath()
+    c.beginPath();
+    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    c.fillStyle = this.color;
+    c.fill();
+    c.stroke();
+    c.closePath();
   }
 
   update() {
-    this.draw()
+    if(this.y + this.radius + this.dy >=  canvas.height) {
+      this.dy = -this.dy * frictionDy;
+    } else {
+      this.dy += gravity;
+    }
+
+    if(this.x + this.radius + this.dx > canvas.width || this.x - this.radius <= 0 ) {
+      this.dx = -this.dx * frictionDx;
+    }
+    this.x += this.dx;
+    this.y += this.dy;
+    this.draw();
   }
 }
 
-// Implementation
-let objects
-function init() {
-  objects = []
+let balls = [];
 
-  for (let i = 0; i < 400; i++) {
-    // objects.push()
+function init() {
+  balls = [];
+
+  for (let i = 0; i < 600; i++) {
+    const radius = randomIntFromRange(20, 30);
+    const x = randomIntFromRange(radius, canvas.width - radius);
+    const y = randomIntFromRange(0, canvas.height - radius);
+    const dx = randomIntFromRange(-2, 2);
+    const dy = randomIntFromRange(-2, 2);
+    balls.push(new Ball(x, y, dx, dy, radius, randomColor(colors)));
   }
 }
 
 // Animation Loop
 function animate() {
   requestAnimationFrame(animate)
-  c.clearRect(0, 0, canvas.width, canvas.height)
+  c.clearRect(0, 0, canvas.width, canvas.height);
 
-  c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y)
-  // objects.forEach(object => {
-  //  object.update()
-  // })
+  balls.forEach(ball => {
+   ball.update()
+  })
 }
 
 init()

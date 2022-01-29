@@ -42,7 +42,7 @@ module.exports = {
       filename: 'index.html',
       favicon: 'favicon.ico',
       template: 'src/index.html'
-    })
+    }),
   ],
   watch: true,
   devtool: 'source-map'
